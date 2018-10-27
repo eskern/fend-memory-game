@@ -7,11 +7,16 @@
 var moves = 0;
 var faceUp = [];
 const deck = document.querySelector('.deck');
+let clockOff = true;
+let time = 0;
+let clock;
+let matches = 0;
+const TOTAL_PAIRS = 8;
 
-function addMove(num){
+function addMove(){
   moves++;
   const moveCount = document.querySelector('.moves');
-  moveCount.innerHTML = num;
+  moveCount.innerHTML = moves;
 }
 
 /*
@@ -84,14 +89,144 @@ function removeStar(){
   }
 }
 
-function game(){
+/*
+ * Adding clock/timer functionality
+ */
+function startClock(){
+  clock = setInterval(function(){
+    time++;
+    displayTime();
+  }, 1000);
+}
+
+/*
+ * Stops the clock when the game is over
+ */
+function stopClock(){
+  clearInterval(clock);
+}
+
+/*
+ * Formats and shows time passed since the start of the game
+ */
+function displayTime(){
+  const timer = document.querySelector('.clock');
+  var minutes = Math.floor(time/60);
+  var seconds = time%60;
+  if(seconds < 10){
+    timer.innerHTML = `${minutes}:0${seconds}`;
+  }
+  else{
+    timer.innerHTML = `${minutes}:${seconds}`;
+  }
+}
+
+/*
+ * Toggles the modal so that it shows up at the right time
+ */
+function toggleModal(){
+  const modal = document.querySelector('.modal__background');
+  modal.classList.toggle('hide');
+}
+
+/*
+ * Adds data to the modal
+ */
+ function modalStats(){
+   const timeStat = document.querySelector('.modal__time');
+   const clockTime = document.querySelector('.clock').innerHTML;
+   const moveStat = document.querySelector('.modal__moves');
+   const starsStat = document.querySelector('.modal__stars');
+   const stars = getStars();
+   timeStat.innerHTML = `Time = ${clockTime}`;
+   moveStat.innerHTML = `Moves = ${moves}`;
+   starsStat.innerHTML = `Stars = ${stars}`;
+ }
+
+ /*
+  * A way to calculate how many stars the player has
+  */
+function getStars(){
+  // we want a list to incrememnt over
+  stars = document.querySelectorAll('.stars li');
+  count = 0;
+  for(star of stars){
+    if(star.style.display != 'none'){
+      count++;
+    }
+  }
+  return count;
+}
+
+function resetTime(){
+  stopClock();
+  clockOff = true;
+  time = 0;
+  displayTime();
+}
+
+function resetMoves(){
+  moves = 0;
+  document.querySelector('.moves').innerHTML = moves;
+}
+
+function resetStars(){
+  const starList = document.querySelectorAll('.stars li');
+  for(star of starList){
+    star.style.display = 'inline';
+  }
+}
+
+/*
+ * Resets game and stats
+ */
+function resetGame(){
+  resetTime();
+  resetMoves();
+  resetStars();
+  game();
+}
+
+/*
+ * Resets game after a gameOver() -- NOT when clicking the retry button
+ */
+function replay(){
+  resetGame();
+  toggleModal();
+}
+
+function shuffleDeck(){
   // A parent of class .deck with children of element type li
   const cardsInit = Array.from(document.querySelectorAll('.card'));
   const shuffled = shuffle(cardsInit);
   for(card of shuffled){
     deck.appendChild(card);
   }
+}
 
+function gameOver(){
+
+  stopClock();
+  modalStats();
+  toggleModal();
+}
+
+/*
+ * Flip all cards over
+ */
+function resetCards(){
+  const cards = document.querySelectorAll('.card');
+  for(let card of cards){
+    card.className = 'card';
+  }
+}
+
+/*
+ * main game method
+ */
+function game(){
+  shuffleDeck();
+  resetCards();
   /*
    * Create a list that holds all of your cards!
    * My understanding: non-matched cards have .open and .show classes
@@ -102,14 +237,22 @@ function game(){
   deck.addEventListener('click', function(){
   const clickedCard = event.target;
   if(isValid(clickedCard)){
+    if(clockOff){
+      clockOff = false;
+      startClock();
+    }
     flipCard(clickedCard);
     faceUp.push(clickedCard);
     if(faceUp.length === 2){
-      addMove(moves);
+      addMove();
       if(checkMatch(faceUp)){
         faceUp[0].classList.toggle('match');
         faceUp[1].classList.toggle('match');
+        matches++;
         faceUp = [];
+        if(matches === TOTAL_PAIRS){
+          gameOver();
+        }
       }
       else{
         setTimeout(function flipOver(){
@@ -120,10 +263,16 @@ function game(){
       }
       starScore();
     }
-  }});
+  }
+  });
 }
 game();
 
+document.querySelector('.modal__cancel').addEventListener('click', function(){
+  toggleModal();
+});
+document.querySelector('.restart').addEventListener('click', resetGame);
+document.querySelector('.modal__replay').addEventListener('click', replay);
 /*
  * set up the event listener for a card. If a card is clicked:
  *  - display the card's symbol (put this functionality in another function that you call from this one)

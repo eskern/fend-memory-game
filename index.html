@@ -16,13 +16,16 @@
         </header>
 
         <section class="score-panel">
+          <!-- new timer -->
+          <span class='clock'>0:00</span>
+
         	<ul class="stars">
         		<li><i class="fa fa-star"></i></li>
         		<li><i class="fa fa-star"></i></li>
         		<li><i class="fa fa-star"></i></li>
         	</ul>
 
-        	<span class="moves">3</span> Moves
+        	<span class="moves">0</span> Moves
 
             <div class="restart">
         		<i class="fa fa-repeat"></i>
@@ -79,6 +82,23 @@
                 <i class="fa fa-cube"></i>
             </li>
         </ul>
+    </div>
+
+    <!-- Screen display when game is over, reference: Matthew Cranford -->
+    <div class='modal__background hide'>
+      <div class='modal__body'>
+        <div class='modal__heading'>
+          <h1 class='modal__title'>Stats</h1>
+          <span class='modal__close'>X</span>
+        </div>
+        <div class='modal__stats'>
+          <span class='modal__time'>Time =</span>
+          <span class='modal__stars'>Stars =</span>
+          <span class='modal__moves'>Moves =</span>
+      </div>
+      <div class='modal__buttons'>
+        <button class='modal__button modal__cancel'>Cancel</button>
+        <button class='modal__button modal__replay'>Replay</button>
     </div>
 
     <script src="js/app.js"></script>
