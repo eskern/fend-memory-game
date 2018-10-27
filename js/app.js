@@ -6,37 +6,13 @@
 
 var moves = 0;
 var faceUp = [];
-
-/*
- * Create a list that holds all of your cards!
- * My understanding: non-matched cards have .open and .show classes
- * Matching cards have the class .match
- * We can toggle which classes are on/off when a card is clicked
- * and if there is indeed a match
- */
 const deck = document.querySelector('.deck');
-deck.addEventListener('click', function(){
-  const clickedCard = event.target;
-  if(isValid(clickedCard)){
-    flipCard(clickedCard);
-    add2Flipped(clickedCard);
-    if(faceUp.length === 2){
-      if(checkMatch(faceUp)){
-        faceUp[0].classList.toggle('match');
-        faceUp[1].classList.toggle('match');
-        faceUp = [];
-      }
-      else{
-        setTimeout(function flipOver(){
-          flipCard(faceUp[0]);
-          flipCard(faceUp[1]);
-          faceUp = [];
-        }, 1000);
-      }
-      moves++;
-    }
-  }
-});
+
+function addMove(num){
+  moves++;
+  const moveCount = document.querySelector('.moves');
+  moveCount.innerHTML = num;
+}
 
 /*
  * Logic: If the clicked target is a card,
@@ -59,13 +35,6 @@ function flipCard(toFlip){
 }
 
 /*
- * Add clicked card to the faceUp array
- */
-function add2Flipped(clickedCard){
-  faceUp.push(clickedCard);
-}
-
-/*
  * Checks if the selected cards match
  */
 function checkMatch(faceUp){
@@ -79,11 +48,9 @@ function checkMatch(faceUp){
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
-
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
@@ -91,9 +58,71 @@ function shuffle(array) {
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-
     return array;
 }
+
+/*
+ * Adds star rating
+ */
+function starScore(){
+  if(moves === 12 || moves === 18){
+    removeStar();
+  }
+}
+
+/*
+ * Star removal helper function
+ */
+function removeStar(){
+  // Gets us a list of the star elements, rather than, say, just the parent
+  const stars = document.querySelectorAll('.stars li');
+  for (star of stars){
+    if(star.style.display != 'none'){
+      star.style.display = 'none';
+      break;
+    }
+  }
+}
+
+function game(){
+  // A parent of class .deck with children of element type li
+  const cardsInit = Array.from(document.querySelectorAll('.card'));
+  const shuffled = shuffle(cardsInit);
+  for(card of shuffled){
+    deck.appendChild(card);
+  }
+
+  /*
+   * Create a list that holds all of your cards!
+   * My understanding: non-matched cards have .open and .show classes
+   * Matching cards have the class .match
+   * We can toggle which classes are on/off when a card is clicked
+   * and if there is indeed a match
+   */
+  deck.addEventListener('click', function(){
+  const clickedCard = event.target;
+  if(isValid(clickedCard)){
+    flipCard(clickedCard);
+    faceUp.push(clickedCard);
+    if(faceUp.length === 2){
+      addMove(moves);
+      if(checkMatch(faceUp)){
+        faceUp[0].classList.toggle('match');
+        faceUp[1].classList.toggle('match');
+        faceUp = [];
+      }
+      else{
+        setTimeout(function flipOver(){
+          flipCard(faceUp[0]);
+          flipCard(faceUp[1]);
+          faceUp = [];
+        }, 1000);
+      }
+      starScore();
+    }
+  }});
+}
+game();
 
 /*
  * set up the event listener for a card. If a card is clicked:
