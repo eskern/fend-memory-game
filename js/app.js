@@ -4,8 +4,8 @@
  *            w3schools.com to recall syntax and properties
  */
 
-var moves = 0;
-var faceUp = [];
+let moves = 0;
+let faceUp = [];
 const deck = document.querySelector('.deck');
 let clockOff = true;
 let time = 0;
